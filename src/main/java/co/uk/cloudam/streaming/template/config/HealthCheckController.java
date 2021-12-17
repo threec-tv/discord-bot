@@ -1,6 +1,6 @@
 package co.uk.cloudam.streaming.template.config;
 
-import org.springframework.security.access.prepost.PreAuthorize;
+//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,7 +11,7 @@ import java.util.Properties;
 
 @RestController
 @RequestMapping("/healthcheck")
-@PreAuthorize("isAnonymous()")
+//@PreAuthorize("isAnonymous()")
 public class HealthCheckController {
 
     private static final String VERSION = "version";

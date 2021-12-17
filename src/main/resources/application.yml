@@ -25,6 +25,10 @@ spring:
 auth0:
   audience: http://stream-webserver.dev
 
+discord:
+  token:
+
+
 threec:
   sqs:
     pricing-subscription: "pricing-subscription-dev"
