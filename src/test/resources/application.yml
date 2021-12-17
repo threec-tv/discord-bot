@@ -1,0 +1,22 @@
+spring:
+  data:
+    mongodb:
+      uuid-representation: standard
+      database: template
+      auto-index-creation: true
+  main:
+    allow-bean-definition-overriding: true
+
+threec:
+  urls:
+    webserver:
+      baseUrl: http://localhost:8080
+aws:
+  enabled: false
+  secretsmanager:
+    enabled: false
+    fail-fast: false
+
+cloud:
+  aws:
+    enabled: false

@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      host: mongo
+
+threec:
+  sqs:
+    pricing-subscription: "pricing-subscription-dev"
+    pricing-dust: "pricing-dust-dev"
+    profile-create: "pricing-create-dev"
+  urls:
+    webserver:
+      baseUrl: http://webserver:8080

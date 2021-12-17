@@ -1,0 +1,13 @@
+aws:
+  secretsmanager:
+    prefix: /secret
+    defaultContext: application
+    profileSeparator: _
+    failFast: true
+    name: application
+    enabled: true
+    region: eu-west-2
+cloud:
+  aws:
+    region:
+      static: eu-west-2

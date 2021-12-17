@@ -1,0 +1,36 @@
+server:
+#  port: 8080
+  http2:
+    enabled: true
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://cloudstream.eu.auth0.com/.well-known/jwks.json
+          issuer-uri: https://cloudstream.eu.auth0.com/
+  data:
+    mongodb:
+      uuid-representation: standard
+      database: template
+      auto-index-creation: true
+  application:
+    name: template
+  main:
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude: org.springframework.cloud.aws.autoconfigure.context.ContextStackAutoConfiguration
+
+auth0:
+  audience: http://stream-webserver.dev
+
+threec:
+  sqs:
+    pricing-subscription: "pricing-subscription-dev"
+    pricing-dust: "pricing-dust-dev"
+    profile-create: "pricing-create-dev"
+  urls:
+    webserver:
+      baseUrl: http://localhost:8080
+

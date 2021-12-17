@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      uri:
+
+threec:
+  sqs:
+    pricing-subscription: "pricing-subscription-prod"
+    pricing-dust: "pricing-dust-prod"
+    profile-create: "pricing-create-prod"
+  urls:
+    webserver:
+      baseUrl:
