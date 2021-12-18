@@ -1,21 +1,20 @@
 package co.uk.cloudam.streaming.template.config.discord;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import java.util.List;
 
 import co.uk.cloudam.streaming.template.discord.SlashCommand;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class SlashCommandListener {
+@Component
+public record SlashCommandListener(List<? extends SlashCommand> commands) {
 
-    private final Collection<SlashCommand> commands;
-
-    public SlashCommandListener(ApplicationContext applicationContext) {
-        //Get all classes that implement our SlashCommand interface and annotated with @Component
-        commands = applicationContext.getBeansOfType(SlashCommand.class).values();
+    @Autowired
+    public SlashCommandListener {
     }
 
     public Mono<Void> handle(ChatInputInteractionEvent event) {

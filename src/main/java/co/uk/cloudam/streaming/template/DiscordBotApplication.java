@@ -1,9 +1,10 @@
 package co.uk.cloudam.streaming.template;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import co.uk.cloudam.streaming.template.config.discord.SlashCommandListener;
@@ -15,22 +16,31 @@ import reactor.core.publisher.Mono;
 
 @SpringBootApplication
 @CommonsLog
-public class DiscordBotApplication {
+public class DiscordBotApplication implements CommandLineRunner {
 
-    @Value("${discord.token}")
-    private String discordToken;
+    private final String discordToken;
+    private final SlashCommandListener slashCommandListener;
 
     public static void main(String[] args) {
-        log.info(args);
-        //Start spring application
-        ApplicationContext springContext = new SpringApplicationBuilder(DiscordBotApplication.class)
-            .build()
-            .run(args);
+        SpringApplication.run(DiscordBotApplication.class, args);
+    }
 
+    @Autowired
+    public DiscordBotApplication(@Value("${discord.token}") String discordToken, SlashCommandListener slashCommandListener) {
+        this.discordToken = discordToken;
+        this.slashCommandListener = slashCommandListener;
+    }
+
+    @Bean
+    public RestClient discordRestClient() {
+        return RestClient.create(discordToken);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
         //Login
-        DiscordClientBuilder.create("").build()
+        DiscordClientBuilder.create(discordToken).build()
             .withGateway(gatewayClient -> {
-                SlashCommandListener slashCommandListener = new SlashCommandListener(springContext);
 
                 Mono<Void> onSlashCommandMono = gatewayClient
                     .on(ChatInputInteractionEvent.class, slashCommandListener::handle)
@@ -39,11 +49,4 @@ public class DiscordBotApplication {
                 return Mono.when(onSlashCommandMono);
             }).block();
     }
-
-    @Bean
-    public RestClient discordRestClient() {
-        return RestClient.create(discordToken);
-
-    }
-
 }

@@ -10,7 +10,7 @@ public class PingCommand implements SlashCommand {
 
     @Override
     public String getName() {
-        return "ping.json";
+        return "ping";
     }
 
     @Override

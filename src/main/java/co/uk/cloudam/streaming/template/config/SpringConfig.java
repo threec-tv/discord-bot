@@ -7,10 +7,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.apachecommons.CommonsLog;
 
@@ -35,6 +37,13 @@ public class SpringConfig implements ApplicationListener<ApplicationReadyEvent> 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         log.warn("Secrets: " + env);
+    }
+
+    @Bean("webserverRestTemplate")
+    public RestTemplate webserverRestTemplate(@Value("${threec.urls.webserver.baseUrl}") String url) {
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().rootUri(url)
+            .defaultHeader("Content-Type", "application/json");
+        return restTemplateBuilder.build();
     }
 
 }

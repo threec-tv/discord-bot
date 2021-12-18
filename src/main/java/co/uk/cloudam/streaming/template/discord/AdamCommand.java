@@ -10,7 +10,7 @@ public class AdamCommand implements SlashCommand {
 
     @Override
     public String getName() {
-        return "adam.json";
+        return "adam";
     }
 
     @Override
