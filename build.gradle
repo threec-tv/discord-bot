@@ -25,6 +25,7 @@ jar {
 }
 
 dependencies {
+    implementation 'co.uk.cloudam.streaming.common:webserver-common:0.0.28'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -66,4 +67,14 @@ task createProperties(dependsOn: processResources) {
 
 classes {
     dependsOn createProperties
+}
+
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/threec-tv/webserver-common")
+        credentials {
+            username = System.getenv("GH_USERNAME")
+            password = System.getenv("GH_TOKEN")
+        }
+    }
 }
