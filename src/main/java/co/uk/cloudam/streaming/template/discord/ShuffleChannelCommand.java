@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class ShuffleChannelCommand implements SlashCommand {
 
+    protected static final String REST_CHANNEL_SHUFFLE = "/rest/channel/shuffle";
     private final RestTemplate restTemplate;
 
     public ShuffleChannelCommand(@Qualifier("webserverRestTemplate") RestTemplate restTemplate) {
@@ -24,9 +25,7 @@ public class ShuffleChannelCommand implements SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
-        //We reply to the command with "Pong!" and make sure it is ephemeral (only the command user can see it)
-
-        ChannelDto randomChannel = restTemplate.getForObject("/rest/channel/shuffle", ChannelDto.class);
+        ChannelDto randomChannel = restTemplate.getForObject(REST_CHANNEL_SHUFFLE, ChannelDto.class);
 
         return event.reply()
             .withEphemeral(true)

@@ -1,13 +1,15 @@
 package co.uk.cloudam.streaming.template.discord;
 
+import org.springframework.stereotype.Component;
+
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
 public class GreetCommand implements SlashCommand {
+
     @Override
     public String getName() {
         return "greet";
@@ -26,7 +28,7 @@ public class GreetCommand implements SlashCommand {
             .get(); //This is warning us that we didn't check if its present, we can ignore this on required options
 
         //Reply to the slash command, with the name the user supplied
-        return  event.reply()
+        return event.reply()
             .withEphemeral(true)
             .withContent("Hello, " + name);
     }
