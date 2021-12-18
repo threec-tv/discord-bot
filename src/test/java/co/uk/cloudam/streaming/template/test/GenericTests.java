@@ -3,17 +3,20 @@ package co.uk.cloudam.streaming.template.test;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.List;
 
+import co.uk.cloudam.streaming.template.TestMocks;
 import co.uk.cloudam.streaming.template.repo.TestEntity;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 
 @DataMongoTest(properties = "aws.secretsmanager.enabled=false")
-class Tests {
+@Import(TestMocks.class)
+class GenericTests {
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -28,6 +31,7 @@ class Tests {
 
         assertThat(all, hasItem(entity));
     }
+
 
 
 }
