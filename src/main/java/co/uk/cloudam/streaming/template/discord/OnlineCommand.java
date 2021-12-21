@@ -4,15 +4,23 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import co.uk.cloudam.streaming.dto.ChannelDto;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
+import lombok.extern.apachecommons.CommonsLog;
 import reactor.core.publisher.Mono;
 
 @Component
+@CommonsLog
 public class OnlineCommand implements SlashCommand {
 
     protected static final String REST_CHANNEL_FEATURED = "/rest/channel/featured";
@@ -30,70 +38,57 @@ public class OnlineCommand implements SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
-        if (event.getOption("user").isPresent()) {
-            String name = event.getOption("user")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .orElse("Null");
-            ChannelDto[] chan = restTemplate.getForObject(REST_CHANNEL_SEARCH, ChannelDto[].class, name);
-            String DisplayName = "";
-            String isStreaming = "";
-            Boolean streamOnline = false;
-            for (ChannelDto chan2 : chan) {
+        Optional<String> searchedUserParameterOptional = event.getOption("user")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString);
 
-                DisplayName = chan2.getDisplayName();
-                isStreaming = chan2.isStreamOnline() ? "**Streaming**!"
-                                                     : "not streaming. Try later?";
-                streamOnline = chan2.isStreamOnline();
+        if (searchedUserParameterOptional.isPresent()) {
+            String searchedUserParameter = searchedUserParameterOptional.get();
+            List<ChannelDto> channels = List.of(restTemplate.getForObject(REST_CHANNEL_SEARCH, ChannelDto[].class, Map.of("name", searchedUserParameter)));
+
+            if (channels.isEmpty()) {
+                return errorResponse(event, searchedUserParameter);
             }
-            String foundText = "User: **" + DisplayName + "**; They are currently " + isStreaming;
-            String notFoundText = "We could not find **" + name + "** at this time. Please check your spelling and try again; Perhaps they're private? O:";
-            if(streamOnline){
-                Button button = Button.link("https://threec.tv/"+DisplayName, "Watch "+DisplayName+"'s Stream!");
-                return event.reply()
-                    .withEphemeral(true)
-                    .withContent((DisplayName.isEmpty() ? notFoundText : foundText))
-                    .withComponents(ActionRow.of(button));
-            }
+
+            ChannelDto channel = channels.get(0);
+
+            String foundText = "User: **" + channel.getDisplayName() + "**; They are currently " + (channel.isStreamOnline() ? "Streaming" : "not streaming");
+
+            Button button = Button.link("https://threec.tv/" + channel.getDisplayName(), "Watch " + channel.getDisplayName() + "'s Stream!");
             return event.reply()
                 .withEphemeral(true)
-                .withContent((DisplayName.isEmpty() ? notFoundText : foundText));
+                .withContent(foundText)
+                .withComponents(ActionRow.of(button));
+
         } else {
-
-            // If no name present
-            ChannelDto[] list = restTemplate.getForObject(REST_CHANNEL_FEATURED, ChannelDto[].class);
-            int count = getListSize(list);
-            String nameList = nameList(list);
-            String AllOfflineText = "No-one is currently streaming. Check back later!";
-            String PeopleOnlineText = "There is " + count + " " + (count > 1 ? "people" : "person")
-                                      + " streaming. Check out: " + nameList;
-            return event.reply()
-                .withEphemeral(true)
-                .withContent(nameList.isEmpty() ? AllOfflineText : PeopleOnlineText);
+            return onlineChannelsResponse(event);
         }
     }
 
-    private String nameList(ChannelDto[] list) {
-        String rlist = "";
-        for (ChannelDto l : list) {
-            if (l.isStreamOnline()) {
-                if(!rlist.isEmpty()){
-                    rlist = rlist + ", **" + l.getDisplayName()+ "** (https://threec.tv/"+l.getDisplayName()+")";
-                } else {
-                    rlist = "**"+ l.getDisplayName() + "** (https://threec.tv/"+l.getDisplayName()+")";
-                }
-            }
-        }
-        return rlist;
+    private InteractionApplicationCommandCallbackReplyMono errorResponse(ChatInputInteractionEvent event, String searchedUserParameter) {
+        String notFoundText = "We could not find **" + searchedUserParameter + "** at this time. Please check your spelling and try again; Perhaps they're private? O:";
+
+        log.error("no channels found, existing");
+
+        return event.reply()
+            .withEphemeral(true)
+            .withContent(notFoundText);
     }
 
-    private int getListSize(ChannelDto[] list) {
-        int i = 0;
-        for (ChannelDto l : list) {
-            if (l.isStreamOnline()) {
-                i++;
-            }
-        }
-        return i;
+    private InteractionApplicationCommandCallbackReplyMono onlineChannelsResponse(ChatInputInteractionEvent event) {
+        // If no searchedUserParameter present
+        List<ChannelDto> list = List.of(restTemplate.getForObject(REST_CHANNEL_FEATURED, ChannelDto[].class));
+        long count = list.stream().map(ChannelDto::isStreamOnline).count();
+        List<ChannelDto> onlineChannels = list.stream().filter(ChannelDto::isStreamOnline).toList();
+
+        String onlineString = onlineChannels.stream()
+            .map(channelDto -> channelDto.getDisplayName() + " find them here https://threec.tv/" + channelDto.getDisplayName())
+            .collect(Collectors.joining("!\n\r "));
+
+        String content = "There are " + count + " people streaming. Check out " + onlineString;
+
+        return event.reply()
+            .withEphemeral(true)
+            .withContent(content);
     }
 }
