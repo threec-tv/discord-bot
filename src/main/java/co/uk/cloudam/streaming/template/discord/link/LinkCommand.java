@@ -30,23 +30,33 @@ public class LinkCommand implements SlashCommand {
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
 
-        var token = UUID.randomUUID();
-
-        LinkCodeEntity obToSave = LinkCodeEntity.builder().token("MYSEXYTOKEN").userName("MYUSERNAME").build();
-        linkCodeRepo.save(obToSave);
-
-        Optional<LinkCodeEntity> myusername = linkCodeRepo.findById("MYUSERNAME");
-
-        log.error(myusername);
+        var newToken = UUID.randomUUID();
+        var discordName = event.getInteraction().getUser().getUsername();
+        if (linkCodeRepo.findById(discordName).isEmpty()) {
+            log.error("Couldn't find user in Database? Create..");
+            addToDatabase(newToken, discordName);
+            log.error("Created! with User: " + discordName + " and Token: " + newToken);
+            log.error("Let's now check to see if it's in the database and proceed that way.");
+        }
+        Optional<LinkCodeEntity> searchByUser = linkCodeRepo.findById(discordName);
+        log.error("SearchByID: User: " + searchByUser.get().getUserName() + " with Token: " + searchByUser.get().getToken());
+        Optional<LinkCodeEntity> searchById = linkCodeRepo.findByToken(searchByUser.get().getToken());
+        log.error("SearchByToken: User: " + searchById.get().getUserName() + " with Token: " + searchById.get().getToken());
 
         return event.reply()
             .withEphemeral(true)
-            .withContent("Hello, " + myusername.get().getToken());
+            .withContent("Hello " + searchByUser.get().getUserName() + ", Your token is: " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
+    }
+
+    private boolean addToDatabase(UUID newToken, String discordName) {
+        LinkCodeEntity obToSave = LinkCodeEntity.builder().token(newToken).userName(discordName).build();
+        linkCodeRepo.save(obToSave);
+        return true;
     }
 
 
     /*
-    Success critrea
+    Success criteria
 
     Upon a user saying link
     It pulls the discord username out of the event
