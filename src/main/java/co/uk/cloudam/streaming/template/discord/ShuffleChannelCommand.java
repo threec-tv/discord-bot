@@ -29,6 +29,6 @@ public class ShuffleChannelCommand implements SlashCommand {
 
         return event.reply()
             .withEphemeral(true)
-            .withContent("Check out, " + randomChannel.getDisplayName() + " https://threec.tc/" + randomChannel.getDisplayName());
+            .withContent("Check out, " + randomChannel.getDisplayName() + " https://threec.tv/" + randomChannel.getDisplayName());
     }
 }

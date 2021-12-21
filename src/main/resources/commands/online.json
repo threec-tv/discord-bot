@@ -1,0 +1,12 @@
+{
+  "name": "online",
+  "description": "Gets a list of streamers currently online.",
+  "options": [
+    {
+      "name": "user",
+      "description": "Optional user",
+      "type": 3,
+      "required": false
+    }
+  ]
+}

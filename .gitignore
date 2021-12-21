@@ -103,3 +103,6 @@ dist
 # TernJS port file
 .tern-port
 /src/main/resources/application-hidden.yml
+
+build
+.gradle
