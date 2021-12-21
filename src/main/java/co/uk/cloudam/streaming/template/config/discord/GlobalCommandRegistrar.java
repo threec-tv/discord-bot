@@ -18,8 +18,10 @@ import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
 import discord4j.rest.service.ApplicationService;
+import lombok.extern.apachecommons.CommonsLog;
 
 @Component
+@CommonsLog
 public class GlobalCommandRegistrar implements ApplicationRunner {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -47,6 +49,8 @@ public class GlobalCommandRegistrar implements ApplicationRunner {
             .getGlobalApplicationCommands(applicationId)
             .collectMap(ApplicationCommandData::name)
             .block();
+
+        log.info(discordCommands);
 
         //Get our commands json from resources as command data
         Map<String, ApplicationCommandRequest> commands = new HashMap<>();

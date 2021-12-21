@@ -13,10 +13,10 @@ spring:
   data:
     mongodb:
       uuid-representation: standard
-      database: template
+      database: discordBot
       auto-index-creation: true
   application:
-    name: template
+    name: discordBot
   main:
     allow-bean-definition-overriding: true
   autoconfigure:
