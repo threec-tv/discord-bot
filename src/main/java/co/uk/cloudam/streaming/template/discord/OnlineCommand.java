@@ -69,7 +69,7 @@ public class OnlineCommand implements SlashCommand {
         String notFoundText = "We could not find **" + searchedUserParameter + "** at this time. Please check your spelling and try again; Perhaps they're private? O:";
 
         log.error("no channels found, existing");
-
+        log.info("here");
         return event.reply()
             .withEphemeral(true)
             .withContent(notFoundText);
