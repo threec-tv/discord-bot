@@ -29,14 +29,14 @@ public class LinkController {
     @GetMapping(value = "/byUser/{discordUserName}", produces = "application/json")
     public TokenResponse getToken(@PathVariable("discordUserName") String discordUserName) {
         Optional<LinkCodeEntity> getTokenById = linkCodeRepo.findById(discordUserName);
-        return !getTokenById.isEmpty() ? new TokenResponse(getTokenById.get().getUserName(), getTokenById.get().getToken(), getTokenById.get().getExpireTime()) : new TokenResponse("notFound", null, null);
+        return getTokenById.isPresent() ? new TokenResponse(getTokenById.get().getUserName(), getTokenById.get().getToken(), getTokenById.get().getExpireTime()) : new TokenResponse("notFound", null, null);
     }
 
 
     @GetMapping(value = "/byToken/{token}", produces = "application/json")
     public TokenResponse getUsernameFromToken(@PathVariable("token") UUID token) {
         Optional<LinkCodeEntity> getTokenByToken = linkCodeRepo.findByToken(token);
-        return !getTokenByToken.isEmpty() ? new TokenResponse(getTokenByToken.get().getUserName(), getTokenByToken.get().getToken(), getTokenByToken.get().getExpireTime()) : new TokenResponse("notFound", null, null);
+        return getTokenByToken.isPresent() ? new TokenResponse(getTokenByToken.get().getUserName(), getTokenByToken.get().getToken(), getTokenByToken.get().getExpireTime()) : new TokenResponse("notFound", null, null);
     }
 
     @Data
