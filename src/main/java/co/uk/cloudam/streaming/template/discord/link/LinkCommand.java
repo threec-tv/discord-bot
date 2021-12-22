@@ -30,7 +30,6 @@ public class LinkCommand implements SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
-
         var newToken = UUID.randomUUID();
         var discordName = event.getInteraction().getUser().getUsername();
         if (doNew(discordName)) {
@@ -39,25 +38,21 @@ public class LinkCommand implements SlashCommand {
         Optional<LinkCodeEntity> searchByUser = linkCodeRepo.findById(discordName);
         return event.reply()
             .withEphemeral(true)
-            .withContent("Hello " + searchByUser.get().getUserName() + ", " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
+            .withContent(searchByUser.isEmpty() ? "Sorry " + discordName + ", We couldn't get your token. " : "Hello " + searchByUser.get().getUserName() + ", " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
+
     }
 
     private boolean doNew(String discordName) {
         Optional<LinkCodeEntity> dataBase = linkCodeRepo.findById(discordName);
-        return dataBase.get().getUserName().isEmpty() || isExpired(dataBase.get().getExpireTime());
+        return dataBase.isEmpty() || isExpired(dataBase.get().getExpireTime());
     }
 
     private boolean isExpired(LocalDateTime expireTime) {
-        LocalDateTime now = LocalDateTime.now();
-        if (expireTime == null) {
-            return true;
-        }
-        return now.isAfter(expireTime);
+        return expireTime == null || LocalDateTime.now().isAfter(expireTime);
     }
 
     private void addToDatabase(UUID newToken, String discordName) {
-        LocalDateTime newExpire = LocalDateTime.now().plusMinutes(10);
-        LinkCodeEntity obToSave = LinkCodeEntity.builder().token(newToken).userName(discordName).expireTime(newExpire).build();
+        LinkCodeEntity obToSave = LinkCodeEntity.builder().token(newToken).userName(discordName).expireTime(LocalDateTime.now().plusMinutes(10)).build();
         linkCodeRepo.save(obToSave);
     }
 
