@@ -3,6 +3,7 @@ package co.uk.cloudam.streaming.template.discord.link;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,26 +33,32 @@ public class LinkCommand implements SlashCommand {
 
         var newToken = UUID.randomUUID();
         var discordName = event.getInteraction().getUser().getUsername();
-        if (linkCodeRepo.findById(discordName).isEmpty()) {
-            log.error("Couldn't find user in Database? Create..");
+        if (doNew(discordName)) {
             addToDatabase(newToken, discordName);
-            log.error("Created! with User: " + discordName + " and Token: " + newToken);
-            log.error("Let's now check to see if it's in the database and proceed that way.");
         }
         Optional<LinkCodeEntity> searchByUser = linkCodeRepo.findById(discordName);
-        log.error("SearchByID: User: " + searchByUser.get().getUserName() + " with Token: " + searchByUser.get().getToken());
-        Optional<LinkCodeEntity> searchById = linkCodeRepo.findByToken(searchByUser.get().getToken());
-        log.error("SearchByToken: User: " + searchById.get().getUserName() + " with Token: " + searchById.get().getToken());
-
         return event.reply()
             .withEphemeral(true)
-            .withContent("Hello " + searchByUser.get().getUserName() + ", Your token is: " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
+            .withContent("Hello " + searchByUser.get().getUserName() + ", " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
     }
 
-    private boolean addToDatabase(UUID newToken, String discordName) {
-        LinkCodeEntity obToSave = LinkCodeEntity.builder().token(newToken).userName(discordName).build();
+    private boolean doNew(String discordName) {
+        Optional<LinkCodeEntity> dataBase = linkCodeRepo.findById(discordName);
+        return dataBase.get().getUserName().isEmpty() || isExpired(dataBase.get().getExpireTime());
+    }
+
+    private boolean isExpired(LocalDateTime expireTime) {
+        LocalDateTime now = LocalDateTime.now();
+        if (expireTime == null) {
+            return true;
+        }
+        return now.isAfter(expireTime);
+    }
+
+    private void addToDatabase(UUID newToken, String discordName) {
+        LocalDateTime newExpire = LocalDateTime.now().plusMinutes(10);
+        LinkCodeEntity obToSave = LinkCodeEntity.builder().token(newToken).userName(discordName).expireTime(newExpire).build();
         linkCodeRepo.save(obToSave);
-        return true;
     }
 
 
