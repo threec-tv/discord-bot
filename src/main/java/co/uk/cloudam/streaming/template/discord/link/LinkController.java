@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.Data;
 import lombok.extern.apachecommons.CommonsLog;
 
 @RestController
@@ -25,16 +27,30 @@ public class LinkController {
     }
 
     @GetMapping(value = "/byUser/{discordUserName}", produces = "application/json")
-    public LinkCodeEntity getToken(@PathVariable("discordUserName") String discordUserName) {
+    public TokenResponse getToken(@PathVariable("discordUserName") String discordUserName) {
         Optional<LinkCodeEntity> getTokenById = linkCodeRepo.findById(discordUserName);
-        return new LinkCodeEntity(getTokenById.get().getUserName(), getTokenById.get().getToken(), getTokenById.get().getExpireTime());
+        return !getTokenById.isEmpty() ? new TokenResponse(getTokenById.get().getUserName(), getTokenById.get().getToken(), getTokenById.get().getExpireTime()) : new TokenResponse("notFound", null, null);
     }
 
 
     @GetMapping(value = "/byToken/{token}", produces = "application/json")
-    public LinkCodeEntity getUsernameFromToken(@PathVariable("token") UUID token) {
+    public TokenResponse getUsernameFromToken(@PathVariable("token") UUID token) {
         Optional<LinkCodeEntity> getTokenByToken = linkCodeRepo.findByToken(token);
-        return new LinkCodeEntity(getTokenByToken.get().getUserName(), getTokenByToken.get().getToken(), getTokenByToken.get().getExpireTime());
+        return !getTokenByToken.isEmpty() ? new TokenResponse(getTokenByToken.get().getUserName(), getTokenByToken.get().getToken(), getTokenByToken.get().getExpireTime()) : new TokenResponse("notFound", null, null);
+    }
+
+    @Data
+    public static class TokenResponse {
+
+        private String userName;
+        private UUID token;
+        private LocalDateTime expireTime;
+
+        public TokenResponse(String userName, UUID token, LocalDateTime expireTime) {
+            this.userName = userName;
+            this.token = token;
+            this.expireTime = expireTime;
+        }
     }
 
 }

@@ -30,25 +30,30 @@ public class LinkCommand implements SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
-        var newToken = UUID.randomUUID();
-        var discordName = event.getInteraction().getUser().getUsername();
-        if (doNew(discordName)) {
-            addToDatabase(newToken, discordName);
+        Optional<LinkCodeEntity> searchByUser = linkCodeRepo.findById(getDiscordName(event));
+        if (doNew(searchByUser)) {
+            addToDatabase(getNewToken(), getDiscordName(event));
         }
-        Optional<LinkCodeEntity> searchByUser = linkCodeRepo.findById(discordName);
         return event.reply()
             .withEphemeral(true)
-            .withContent(searchByUser.isEmpty() ? "Sorry " + discordName + ", We couldn't get your token. " : "Hello " + searchByUser.get().getUserName() + ", " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
+            .withContent(searchByUser.isEmpty() ? "Sorry " + getDiscordName(event) + ", We couldn't get your token. " : "Hello " + searchByUser.get().getUserName() + ", " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
 
     }
 
-    private boolean doNew(String discordName) {
-        Optional<LinkCodeEntity> dataBase = linkCodeRepo.findById(discordName);
+    private boolean doNew(Optional<LinkCodeEntity> dataBase) {
         return dataBase.isEmpty() || isExpired(dataBase.get().getExpireTime());
     }
 
+    private UUID getNewToken() {
+        return UUID.randomUUID();
+    }
+
+    private String getDiscordName(ChatInputInteractionEvent event) {
+        return event.getInteraction().getUser().getUsername();
+    }
+
     private boolean isExpired(LocalDateTime expireTime) {
-        return expireTime == null || LocalDateTime.now().isAfter(expireTime);
+        return LocalDateTime.now().isAfter(expireTime);
     }
 
     private void addToDatabase(UUID newToken, String discordName) {
