@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import co.uk.cloudam.streaming.template.discord.SlashCommand;
@@ -30,18 +29,14 @@ public class LinkCommand implements SlashCommand {
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
-        Optional<LinkCodeEntity> searchByUser = linkCodeRepo.findById(getDiscordName(event));
-        if (doNew(searchByUser)) {
-            addToDatabase(getNewToken(), getDiscordName(event));
+        LinkCodeEntity searchByUser = linkCodeRepo.findById(getDiscordName(event)).orElse(addToDatabase(getDiscordName(event)));
+        if (isExpired(searchByUser.getExpireTime())) {
+            searchByUser = addToDatabase(getDiscordName(event));
         }
         return event.reply()
             .withEphemeral(true)
-            .withContent(searchByUser.isEmpty() ? "Sorry " + getDiscordName(event) + ", We couldn't get your token. " : "Hello " + searchByUser.get().getUserName() + ", " + searchByUser.get().getToken() + " .. -Insert nifty bow, here-");
+            .withContent("Hello " + searchByUser.getUserName() + ", " + searchByUser.getToken() + " .. -Insert nifty bow, here-");
 
-    }
-
-    private boolean doNew(Optional<LinkCodeEntity> dataBase) {
-        return dataBase.isEmpty() || isExpired(dataBase.get().getExpireTime());
     }
 
     private UUID getNewToken() {
@@ -56,9 +51,9 @@ public class LinkCommand implements SlashCommand {
         return LocalDateTime.now().isAfter(expireTime);
     }
 
-    private void addToDatabase(UUID newToken, String discordName) {
-        LinkCodeEntity obToSave = LinkCodeEntity.builder().token(newToken).userName(discordName).expireTime(LocalDateTime.now().plusMinutes(10)).build();
-        linkCodeRepo.save(obToSave);
+    private LinkCodeEntity addToDatabase(String discordName) {
+        LinkCodeEntity obToSave = LinkCodeEntity.builder().token(getNewToken()).userName(discordName).expireTime(LocalDateTime.now().plusMinutes(10)).build();
+        return linkCodeRepo.save(obToSave);
     }
 
 
