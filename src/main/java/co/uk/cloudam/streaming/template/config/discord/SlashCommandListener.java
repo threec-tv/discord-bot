@@ -7,14 +7,17 @@ import java.util.List;
 
 import co.uk.cloudam.streaming.template.discord.SlashCommand;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import lombok.extern.apachecommons.CommonsLog;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
+@CommonsLog
 public record SlashCommandListener(List<? extends SlashCommand> commands) {
 
     @Autowired
     public SlashCommandListener {
+        log.info(commands);
     }
 
     public Mono<Void> handle(ChatInputInteractionEvent event) {
