@@ -31,9 +31,6 @@ discord:
 
 threec:
   sqs:
-    pricing-subscription: "pricing-subscription-dev"
-    pricing-dust: "pricing-dust-dev"
-    profile-create: "pricing-create-dev"
   urls:
     webserver:
       baseUrl: http://localhost:8080
