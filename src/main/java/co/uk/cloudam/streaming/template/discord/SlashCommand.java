@@ -10,6 +10,8 @@ import reactor.core.publisher.Mono;
 public interface SlashCommand {
 
     String getName();
+    String getDescription();
 
     Mono<Void> handle(ChatInputInteractionEvent event);
+
 }

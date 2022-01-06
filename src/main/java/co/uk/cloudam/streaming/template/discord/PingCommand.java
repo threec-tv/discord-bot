@@ -12,6 +12,7 @@ public class PingCommand implements SlashCommand {
     public String getName() {
         return "ping";
     }
+    public String getDescription() { return "Ping Pong!"; }
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
