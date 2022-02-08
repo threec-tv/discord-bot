@@ -32,9 +32,8 @@ public class OnlineCommand implements SlashCommand {
     }
 
     @Override
-    public String getName() {
-        return "online";
-    }
+    public String getName() {  return "online";   }
+    public String getDescription() { return "Fetches a list of people streaming from the ThreeC API"; }
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {

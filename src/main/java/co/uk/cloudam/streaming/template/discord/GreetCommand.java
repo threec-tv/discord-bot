@@ -14,6 +14,7 @@ public class GreetCommand implements SlashCommand {
     public String getName() {
         return "greet";
     }
+    public String getDescription() { return "Greets the specified user!"; }
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {

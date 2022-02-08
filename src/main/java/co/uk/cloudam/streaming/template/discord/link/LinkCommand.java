@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 @CommonsLog
 public class LinkCommand implements SlashCommand {
 
+
     private final LinkCodeRepo linkCodeRepo;
 
     @Autowired
@@ -22,9 +23,13 @@ public class LinkCommand implements SlashCommand {
         this.linkCodeRepo = linkCodeRepo;
     }
 
+
     @Override
     public String getName() {
         return "link";
+    }
+    public String getDescription() {
+        return "Handles the Linking System.";
     }
 
     @Override
@@ -52,6 +57,7 @@ public class LinkCommand implements SlashCommand {
     }
 
     private LinkCodeEntity addToDatabase(String discordName) {
+
         LinkCodeEntity obToSave = LinkCodeEntity.builder().token(getNewToken()).userName(discordName).expireTime(LocalDateTime.now().plusMinutes(10)).build();
         return linkCodeRepo.save(obToSave);
     }

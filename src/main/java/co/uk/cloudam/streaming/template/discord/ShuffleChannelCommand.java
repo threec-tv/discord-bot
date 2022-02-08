@@ -22,6 +22,7 @@ public class ShuffleChannelCommand implements SlashCommand {
     public String getName() {
         return "shuffle";
     }
+    public String getDescription() { return "Uses the ThreeC API to shuffle between channels."; }
 
     @Override
     public Mono<Void> handle(ChatInputInteractionEvent event) {
